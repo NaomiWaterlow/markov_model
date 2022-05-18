@@ -42,7 +42,7 @@ main_db[rsv=="Neg", rsv := 0]
 main_db[rsv=="Pos", rsv := 1]
 
 # remove unneccesary columns
-main_db <- main_db[,c("factor_id","rsv", "flu", "timestep")]
+main_db <- main_db[,c("npsdatecol","factor_id","rsv", "flu", "timestep")]
 main_db$state <- "tbd"
 
 for(i in unique(main_db$factor_id)){

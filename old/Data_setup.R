@@ -19,7 +19,7 @@ main_db[,timestep := (npsdatecol - start_date)]
 main_db[,timestep := as.numeric(timestep, units="days")]
 
 ##### Investigate the numbers that get infected multiple times ####
-num_days_neg <- 12
+num_days_neg <- 14
 #
 flu_subset <- main_db[flu == "Pos"]
 num_flu_infected <- length(unique(flu_subset$indid))
