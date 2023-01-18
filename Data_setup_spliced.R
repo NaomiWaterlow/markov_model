@@ -1,9 +1,19 @@
 # Data setup, splicing seasons together
-
-PHIRST_NP <- data.table(read.csv("~/Documents/Data/PHIRST Nasopharyngeal specimens and Master 2021-10-19/PHIRST Nasopharyngeal specimens 2016-2018 Flu & RSV 2022-04-19.csv",
+library(data.table)
+PHIRST_NP <- data.table(read.csv("~/Documents/OneDrive - London School of Hygiene and Tropical Medicine/Data/PHIRST Nasopharyngeal specimens and Master 2021-10-19/PHIRST Nasopharyngeal specimens 2016-2018 Flu & RSV 2022-04-19.csv",
                                  na.strings = ""))
 # format correctly
-main_db <- PHIRST_NP[,c("indid", "npsdatecol", "flu", "rsv")]
+PHIRST_BACKGROUND <- data.table(read.csv("~/Documents/OneDrive - London School of Hygiene and Tropical Medicine/Data/PHIRST Nasopharyngeal specimens and Master 2021-10-19/PHIRST Master 2016-2018 Flu & RSV 2022-04-19.csv"))
+# format correctly
+main_db <- PHIRST_NP[,c("indid", "npsdatecol", "flu", "rsv", "npsinfa", "npsinfb")]
+main_db[,flutype := "unknown"]
+main_db[npsinfa == "1",flutype := "A"]
+main_db[npsinfb == "1",flutype := "B"]
+main_db[, npsinfa := NULL]
+main_db[, npsinfb := NULL]
+colnames(PHIRST_BACKGROUND)[1] <- "indid"
+main_db[PHIRST_BACKGROUND, on = c("indid"),age_grp := i.age_cat_at_consent]
+
 main_db$indid <- as.factor(main_db$indid)
 main_db$npsdatecol <- as.Date(main_db$npsdatecol, "%d-%m-%Y")
 # remove the rows that have NA obsevations for flu/rsv (i.e. no data recoreded)
@@ -15,6 +25,20 @@ main_db[,timestep := (npsdatecol - start_date)]
 main_db[,timestep := as.numeric(timestep)]
 
 
+##### Investigate the numbers that get infected multiple times ####
+num_days_neg <- 14
+flu_subset <- main_db[flu == "Pos"]
+num_flu_infected <- length(unique(flu_subset$indid))
+flu_subset[, time_diff := timestep-shift(timestep, 1L, type ="lag"), by =indid]
+flu_tab <- table(table(flu_subset[time_diff > num_days_neg]$indid))
+print(sum(flu_tab[-1])/num_flu_infected*100)
+(flu_tab/num_flu_infected)*100
+### how many double positives for flu, assuming X days negative in between)
+rsv_subset <- main_db[rsv == "Pos"]
+num_rsv_infected <- length(unique(rsv_subset$indid))
+rsv_subset[, time_diff := timestep-shift(timestep, 1L, type ="lag"), by =indid]
+rsv_tab <- table(table(rsv_subset[time_diff > num_days_neg]$indid))
+print(sum(rsv_tab[-1])/num_rsv_infected*100)
 ### respecify as positive those that are within 14 days of previous, 
 ### and remove the ones with subsequent re-infections
 repeat_rsvs <- rsv_subset[time_diff > num_days_neg]
@@ -42,7 +66,8 @@ main_db[rsv=="Neg", rsv := 0]
 main_db[rsv=="Pos", rsv := 1]
 
 # remove unneccesary columns
-main_db <- main_db[,c("npsdatecol","factor_id","rsv", "flu", "timestep")]
+main_db <- main_db[,c("npsdatecol","factor_id","rsv", "flu", "timestep", "flutype", 
+                      "age_grp")]
 main_db$state <- "tbd"
 
 for(i in unique(main_db$factor_id)){
@@ -91,7 +116,40 @@ main_db[timestep > 258, timestep := timestep-77]
 main_db[timestep >469, track_colour := "third"]
 main_db[timestep > 469, timestep := timestep-78]
 
-#save(main_db, file="main_db_seasons_april.Rdata")
+#### if want as one! ####
+
+
+#reformat nice
+main_db[flutype=="unknown", flutype := NA]
+main_db[age_grp =="< 5 years", age_grp := "age1"]
+main_db[age_grp =="5 - 18 years", age_grp := "age2"]
+main_db[age_grp =="19 - 65 years", age_grp := "age3"]
+main_db[age_grp ==">65 years", age_grp := "age4"]
+
+#Add timing
+main_db[timestep < 30, timeperiodRSV := "t0"]
+for(i in 2:(length(pci_splits)[1])){
+main_db[timestep >= pci_splits[i-1] & timestep < pci_splits[i],
+        timeperiodRSV := paste0("t",i-1)]
+}
+main_db[timestep >= tail(pci_splits,1), timeperiodRSV := "t25"]
+main_db[,timeperiodFlu := timeperiodRSV]
+main_db[,timeperiodRSV := as.factor(timeperiodRSV)]
+main_db[,timeperiodFlu := as.factor(timeperiodFlu)]
+
+
+##### FOR THE PARIAL DATA ######
+# main_db <- main_db[track_colour %in% c("second", "third"),]
+# littlest <- min(main_db$timestep)
+# main_db[,timestep := timestep-littlest]
+
+##### FOR SPLICED TO ONE ######
+
+
+
+#save(main_db, file="main_db_seasons_april_covariates.Rdata")
+# save(main_db, file="main_db_seasons_april_covariates_partial.Rdata")
+
 
 # total numbers of each by timestep
 main_db$flu <- as.numeric(as.character(main_db$flu))
