@@ -9,6 +9,6 @@ Files are:
 - model_run_covariates.R: This runs the markov modelling
 - evaluate_output.R: This evaluates the output from the markov modelling and creates output plots
 
-A summarised version of the data is available in Data/flu_rsv_data.csv
+A summarised version of the data is available in Data/rsv_flu_data.csv
 
 Analysis was conducted using R version 4.2.2
