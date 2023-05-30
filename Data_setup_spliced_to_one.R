@@ -137,6 +137,9 @@ plotter1 <- as.data.frame(plotter1)
 SEASONALITY <- ggplot(plotter,
                       aes(x = Month, y = value, colour = variable, 
                           group=interaction(year,variable))) + 
+  geom_rect(data = plotter, xmin = as.numeric(plotter$Month[[7]]), 
+            xmax = as.numeric(plotter$Month[[10]])+0.75,
+            ymin = 0, ymax = Inf, alpha = 0.01, fill = "lightgrey",color = NA) +
   geom_line(alpha = 0.5) +
    theme_linedraw() + 
    geom_line(data=plotter1, aes(x = Month, y = value, colour = variable, 
@@ -149,10 +152,10 @@ SEASONALITY <- ggplot(plotter,
   scale_colour_manual(values=c(colour1, colour2)) + 
   geom_rect(data = plotter, xmin = as.numeric(plotter$Month[[52]])+0.25, 
             xmax = as.numeric(plotter$Month[[54]]),
-            ymin = 0, ymax = Inf, alpha = 0.01, fill = "grey",color = NA) + 
+            ymin = 0, ymax = Inf, alpha = 0.01, fill = "grey18",color = NA) + 
   geom_rect(data = plotter, xmin = as.numeric(plotter$Month[[7]]), 
             xmax = as.numeric(plotter$Month[[7]])+0.75,
-            ymin = 0, ymax = Inf, alpha = 0.01, fill = "grey",color = NA) 
+            ymin = 0, ymax = Inf, alpha = 0.01, fill = "grey18",color = NA) 
   
 SEASONALITY# ### respecify as positive those that are within 14 days of previous, 
 # ### and remove the ones with subsequent re-infections

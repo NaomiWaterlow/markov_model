@@ -5,4 +5,7 @@
 .DS_Store
 
 /old
+/plots
+/cluster_files
+/Rdata outputs
 *.TIFF

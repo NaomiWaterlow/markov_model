@@ -5,11 +5,18 @@ library(minqa)
 
 load("main_db_seasons_april_covariates.Rdata")
 
+# run this line to run the sensitivity analysis
+main_db<- main_db[track_colour %in% c("second", "third")]
 
 #### times for pci splits ####
 
 #pci_splits <-  seq(from = 30, by = 30, to = 289)
 pci_splits <- c(30,60,90,120,150,181,
+                211,241,271,301,331,361,391,421,451,467,
+                497,527,557,587,617,647,677,707,737)
+
+# run this for pci splits
+pci_splits <- c(
                 211,241,271,301,331,361,391,421,451,467,
                 497,527,557,587,617,647,677,707,737)
 
@@ -162,4 +169,4 @@ output <- msm(formula = num_state~timestep,
               ,control=list(fnscale = 57500, maxit = 5)
 )
 
-save(output, file= "covariate_age.Rdata")
+save(output, file= "sesitivity.Rdata")

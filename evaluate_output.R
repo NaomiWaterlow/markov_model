@@ -2,8 +2,12 @@
 library(ggplot2)
 library(msm)
 library(data.table)
+library(gridExtra)
+
+colour1 <- "#fc8d62"
+colour2 <- "#66c2a5"
+colour3 <- "#8da0cb"
 # see the overall output 
-output
 
 pci_splits <- c(30,60,90,120,150,181,
                 211,241,271,301,331,361,391,421,451,467,
@@ -155,16 +159,17 @@ timing_hazards_m[,week := isoweek(Date)]
 
 
 # plot the output 
-FOIS <- ggplot(timing_hazards_m, aes(x = week, y = log(value), colour = variable)) + 
+FOIS <- ggplot(timing_hazards_m, aes(x = week, y = value, colour = variable)) + 
   geom_line()+
   geom_point() + 
   theme_linedraw() + 
   facet_grid(year~.) +
   lims(x=c(5,45))+
-  geom_ribbon(aes(ymin = log(lower), ymax = log(upper), fill = variable), alpha = 0.3, colour =NA) + 
-  labs(y= " Log Hazard ratio compared to first month of data", fill = "Force of Infection", 
-       colour = "Force of Infection", x = "Week of the year", title = "A") + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = variable), alpha = 0.3, colour =NA) + 
+  labs(y= "Hazard ratio compared to first month of data", fill = "Force of Infection", 
+       colour = "Force of Infection", x = "Week of the year", title = "D") + 
   scale_colour_manual(values = c(colour1, colour2)) +
+scale_y_log10() +
   scale_fill_manual(values =c(colour1,colour2)) + 
   theme(axis.text = element_text(size = 15), 
         axis.title = element_text(size=15), 
@@ -215,10 +220,10 @@ age_hazards <- rbind(age_hazards,data.frame(
 age_hazards$label_age <- factor(age_hazards$label_age, levels = 
                                   c("< 5 years", "5 - 18 years","19 - 65 years",">65 years"))
 age_hazards$label_age <- factor(age_hazards$label_age, levels = rev(levels(age_hazards$label_age)))
-
-AGES <- ggplot(age_hazards, aes(x = label_age, y = log(hazard), group= type, colour = type)) + 
+age_hazards[type == "Flu", type := "Influenza"]
+AGES <- ggplot(age_hazards, aes(y = label_age, x = hazard, group= type, colour = type)) + 
   geom_point( size =1.5,position=position_dodge(width = 0.30))+
-  geom_pointrange(aes(ymin = log(lower), ymax = log(upper)),
+  geom_pointrange(aes(xmin = lower, xmax = upper),
                   position=position_dodge(width = 0.30),
                   size =1.5) + 
   theme_linedraw() + 
@@ -227,8 +232,10 @@ AGES <- ggplot(age_hazards, aes(x = label_age, y = log(hazard), group= type, col
         title = element_text(size=17), 
         legend.text = element_text(size=15)) +
   scale_colour_manual(values = c(colour1, colour2 ))+
-  labs(x = "Age group", y = "Log Hazard ratio compared to <5 year olds", title="B") +
-  coord_flip() + theme(plot.margin=margin(10,20,10,10))
+  coord_trans(x="log2") +
+  labs(y = "Age group", x = "Hazard ratio compared to <5 year olds (log scale)", title="B") +
+  theme(plot.margin=margin(10,20,10,10)) #+ 
+#  coord_flip() 
 
 # AGES_COMBI <- ggplot(age_hazards, aes(x = label_age, y = log(hazard), fill= type, colour = type)) + 
 #   geom_point( size =1.5, position = position_dodge(width =0.4),)+
@@ -246,9 +253,9 @@ AGES <- ggplot(age_hazards, aes(x = label_age, y = log(hazard), group= type, col
 
 AGES_COMBI
 
-tiff("Supplement_21.TIFF", width=1200, height=800)
-grid.arrange(FOIS, AGES, layout_matrix = rbind(c(1,2)))
-dev.off()
+# tiff("Supplement_21.TIFF", width=1200, height=800)
+# grid.arrange(FOIS, AGES, layout_matrix = rbind(c(1,2)))
+# dev.off()
 
 
 BLANK <- ggplot() + theme_minimal() + labs(title ="A") +
