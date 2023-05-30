@@ -147,7 +147,7 @@ main_db[,timeperiodFlu := as.factor(timeperiodFlu)]
 
 
 
-#save(main_db, file="main_db_seasons_april_covariates.Rdata")
+save(main_db, file="main_db_seasons_april_covariates.Rdata")
 # save(main_db, file="main_db_seasons_april_covariates_partial.Rdata")
 
 
