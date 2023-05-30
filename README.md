@@ -6,7 +6,7 @@ Files are:
 - descriptive_analysis.R: This loads and combines the datasets, and runs a descriptive analysis 
 - crude_analyses.R: This runs the statistical/crude analyses
 - prep_data.R: This prepares the data for use in the markov model
-- model_run_covariates.R: This runs the markov modelling
+- model_run_covariates.R: This runs the markov modelling. This sources mcmcmH.R to run the model
 - evaluate_output.R: This evaluates the output from the markov modelling and creates output plots
 
 A summarised version of the data is available in Data/rsv_flu_data.csv
