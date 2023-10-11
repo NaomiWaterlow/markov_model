@@ -3,10 +3,16 @@ library(msm)
 library(data.table)
 library(minqa)
 
-load("Rdata outputs/main_db_seasons_april_covariates.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/main_db_seasons_april_covariates.Rdata")
 
 # # run this line to run the sensitivity analysis
 # main_db<- main_db[track_colour %in% c("second", "third")]
+
+### add for sensitivity analysis
+
+at_least_one_rsv <- unlist(unique(main_db[rsv == 1, "factor_id"]))
+main_db$increased_S <- 0
+main_db[factor_id %in% at_least_one_rsv, increased_S := 1 ]
 
 #### times for pci splits ####
 
@@ -17,8 +23,8 @@ pci_splits <- c(30,60,90,120,150,181,
 
 # # run this for pci splits
 # pci_splits <- c(
-#                 211,241,271,301,331,361,391,421,451,467,
-#                 497,527,557,587,617,647,677,707,737)
+#   211,241,271,301,331,361,391,421,451,467,
+#   497,527,557,587,617,647,677,707,737)
 
 # parameters to keep constant
 # fix 3 and 7 (gammas)
@@ -97,19 +103,20 @@ output <- msm(formula = num_state~timestep,
               econstraint = rep(1,68),
               initprobs = c(0.95,rep(0.01,10)),
               est.initprobs = T,
-              covariates = list(  "1-2" = ~age_grp + timeperiodRSV,
-                                  "1-5" = ~age_grp + timeperiodFlu,
-                                  "2-6" = ~age_grp + timeperiodFlu,
-                                  "3-7" = ~age_grp + timeperiodFlu,
-                                  "4-7" = ~age_grp + timeperiodFlu,
-                                  "5-6" = ~age_grp + timeperiodRSV,
-                                  "8-9" = ~age_grp + timeperiodRSV,
-                                  "10-9" = ~age_grp + timeperiodRSV
+              covariates = list(  "1-2" = ~age_grp + timeperiodRSV + increased_S,# adding increased S to all FOI transmissions
+                                  "1-5" = ~age_grp + timeperiodFlu + increased_S,
+                                  "2-6" = ~age_grp + timeperiodFlu+ increased_S,
+                                  "3-7" = ~age_grp + timeperiodFlu+ increased_S,
+                                  "4-7" = ~age_grp + timeperiodFlu+ increased_S,
+                                  "5-6" = ~age_grp + timeperiodRSV + increased_S,
+                                  "8-9" = ~age_grp + timeperiodRSV + increased_S,
+                                  "10-9" = ~age_grp + timeperiodRSV + increased_S
               ),
               constraint = list(
                 age_grpage2 = c(1,2,2,2,2,1,1,1),
-                                age_grpage3 = c(1,2,2,2,2,1,1,1),
-                                age_grpage4 = c(1,2,2,2,2,1,1,1),
+                age_grpage3 = c(1,2,2,2,2,1,1,1),
+                age_grpage4 = c(1,2,2,2,2,1,1,1),
+                increased_S = c(1,1,1,1,1,1,1,1), # same impact of increased S on all FOI transitions
                 timeperiodRSVt1  = c(1,1,1,1),
                 timeperiodRSVt2  = c(1,1,1,1),
                 timeperiodRSVt3  = c(1,1,1,1),
@@ -160,12 +167,12 @@ output <- msm(formula = num_state~timestep,
                 timeperiodFlut23 = c(1,1,1,1),
                 timeperiodFlut24 = c(1,1,1,1),
                 timeperiodFlut25 = c(1,1,1,1)
-    
-                  # old saved c(1,2,3,2,4,2,2,1,5,3,5,5,1,4,3,1),
+                
+                # old saved c(1,2,3,2,4,2,2,1,5,3,5,5,1,4,3,1),
               ),
-            # pci = pci_splits
-               method= "BFGS"
+              # pci = pci_splits
+              method= "BFGS"
               ,control=list(fnscale = 57500, maxit = 10000)
 )
 
-save(output, file= "replciate_testing.Rdata")
+ save(output, file= "highrisk_7.Rdata")

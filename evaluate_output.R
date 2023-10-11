@@ -15,7 +15,7 @@ pci_splits <- c(30,60,90,120,150,181,
 
 # what is the impact of interaction?
 # strength
-load("~/Documents/GitHub/markov_model/july_fixed_7_rep.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_7_rep.Rdata")
 when_inf_first <- qratio.msm(output, ind1 = c(5,6), ind2 = c(1,2))
 when_rsv_first <- qratio.msm(output, ind1 = c(2,6), ind2 = c(1,5))
 print(paste0("Transmission from S to I with RSV is ", round(when_inf_first[1],2)," (", round(when_inf_first[3],2),
@@ -27,7 +27,7 @@ print(paste0("Transmission from S to I with flu is ", round(when_rsv_first[1],2)
 when_inf_first_7 <- c(when_inf_first, virus_infected = "Influenza", Interaction_duration = "7 days")
 when_rsv_first_7 <- c(when_rsv_first, virus_infected = "RSV", Interaction_duration = "7 days")
 
-load("~/Documents/GitHub/markov_model/july_fixed_14_rep.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_14_rep.Rdata")
 when_inf_first <- qratio.msm(output, ind1 = c(5,6), ind2 = c(1,2))
 when_rsv_first <- qratio.msm(output, ind1 = c(2,6), ind2 = c(1,5))
 print(paste0("Transmission from S to I with RSV is ", round(when_inf_first[1],2)," (", round(when_inf_first[3],2),
@@ -39,7 +39,7 @@ print(paste0("Transmission from S to I with flu is ", round(when_rsv_first[1],2)
 when_inf_first_14 <- c(when_inf_first, virus_infected = "Influenza", Interaction_duration = "14 days")
 when_rsv_first_14 <- c(when_rsv_first, virus_infected = "RSV", Interaction_duration = "14 days")
 
-load("~/Documents/GitHub/markov_model/july_fixed_21_rep.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_21_rep.Rdata")
 when_inf_first <- qratio.msm(output, ind1 = c(5,6), ind2 = c(1,2))
 when_rsv_first <- qratio.msm(output, ind1 = c(2,6), ind2 = c(1,5))
 print(paste0("Transmission from S to I with RSV is ", round(when_inf_first[1],2)," (", round(when_inf_first[3],2),
@@ -52,7 +52,7 @@ when_inf_first_21 <- c(when_inf_first, virus_infected = "Influenza", Interaction
 when_rsv_first_21 <- c(when_rsv_first, virus_infected = "RSV", Interaction_duration = "21 days")
 
 
-load("~/Documents/GitHub/markov_model/july_fixed_28_rep.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_28_rep.Rdata")
 when_inf_first <- qratio.msm(output, ind1 = c(5,6), ind2 = c(1,2))
 when_rsv_first <- qratio.msm(output, ind1 = c(2,6), ind2 = c(1,5))
 print(paste0("Transmission from S to I with RSV is ", round(when_inf_first[1],2)," (", round(when_inf_first[3],2),
@@ -104,7 +104,7 @@ INTERACTION <- ggplot(interaction_info, aes(x = virus_infected, y = estimate, co
 # For each time there are two parameters estimated
 # extract from model
 
-load("~/Documents/GitHub/markov_model/july_fixed_7_rep2.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_7_rep2.Rdata")
 timing_hazards_list <- hazard.msm(output)
 # combine into data table
 timing_hazards <- data.table(names_times = names(timing_hazards_list)[4:28])
@@ -165,7 +165,7 @@ FOIS <- ggplot(timing_hazards_m, aes(x = week, y = value, colour = variable)) +
   theme_linedraw() + 
   facet_grid(year~.) +
   lims(x=c(5,45))+
-  geom_ribbon(aes(ymin = lower, ymax = upper, fill = variable), alpha = 0.3, colour =NA) + 
+ # geom_ribbon(aes(ymin = lower, ymax = upper, fill = variable), alpha = 0.3, colour =NA) + 
   labs(y= "Hazard ratio compared to first month of data", fill = "Force of Infection", 
        colour = "Force of Infection", x = "Week of the year", title = "D") + 
   scale_colour_manual(values = c(colour1, colour2)) +
@@ -183,7 +183,7 @@ FOISB <- FOIS
 
 ###### hazards for age groups
 
-load("~/Documents/GitHub/markov_model/july_fixed_7_rep2.Rdata")
+load("~/Documents/GitHub/markov_model/Rdata outputs/july_fixed_7_rep2.Rdata")
 # combine into data table
 age_hazards <- data.table(names_times = names(timing_hazards_list)[1:3])
 age_hazards$hazard <- sapply(timing_hazards_list[1:3], function(x) x[1,1])
@@ -223,9 +223,9 @@ age_hazards$label_age <- factor(age_hazards$label_age, levels = rev(levels(age_h
 age_hazards[type == "Flu", type := "Influenza"]
 AGES <- ggplot(age_hazards, aes(y = label_age, x = hazard, group= type, colour = type)) + 
   geom_point( size =1.5,position=position_dodge(width = 0.30))+
-  geom_pointrange(aes(xmin = lower, xmax = upper),
-                  position=position_dodge(width = 0.30),
-                  size =1.5) + 
+ # geom_pointrange(aes(xmin = lower, xmax = upper),
+ #                 position=position_dodge(width = 0.30),
+  #                size =1.5) + 
   theme_linedraw() + 
   theme(axis.text = element_text(size = 15), 
         axis.title = element_text(size=15), 
